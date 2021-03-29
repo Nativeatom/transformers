@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """ PyTorch PEGASUS model. """
-
+import pdb
 import copy
 import math
 import random
@@ -722,7 +722,12 @@ class PegasusEncoder(PegasusPreTrainedModel):
         if inputs_embeds is None:
             inputs_embeds = self.embed_tokens(input_ids) * self.embed_scale
 
-        embed_pos = self.embed_positions(input_shape)
+        # change
+        try:
+            embed_pos = self.embed_positions(input_shape)
+        except:
+            print("Embed Position Err")
+            pdb.set_trace()
 
         hidden_states = inputs_embeds + embed_pos
 
