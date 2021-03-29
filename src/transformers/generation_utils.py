@@ -414,6 +414,7 @@ class GenerationMixin:
             try:
                 model_kwargs["encoder_outputs"]: ModelOutput = encoder(input_ids, return_dict=True, **encoder_kwargs)
             except:
+                print(input_ids.shape)
                 print("input_ids max: {} min: {}".format(input_ids.max(), input_ids.min()))
                 pdb.set_trace()
         return model_kwargs
