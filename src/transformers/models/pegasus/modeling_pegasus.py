@@ -825,6 +825,10 @@ class PegasusDecoder(PegasusPreTrainedModel):
 
         self.init_weights()
 
+        # change
+        self.max_position_embeddings = config.max_position_embeddings
+        self.d_model = config.d_model
+
     def get_input_embeddings(self):
         return self.embed_tokens
 
