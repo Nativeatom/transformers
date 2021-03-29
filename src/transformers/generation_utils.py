@@ -14,6 +14,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import pdb
+
 from dataclasses import dataclass
 from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple, Union
 
@@ -409,7 +411,11 @@ class GenerationMixin:
             encoder_kwargs = {
                 argument: value for argument, value in model_kwargs.items() if not argument.startswith("decoder_")
             }
-            model_kwargs["encoder_outputs"]: ModelOutput = encoder(input_ids, return_dict=True, **encoder_kwargs)
+            try:
+                model_kwargs["encoder_outputs"]: ModelOutput = encoder(input_ids, return_dict=True, **encoder_kwargs)
+            except:
+                print("input_ids max: {} min: {}".format(input_ids.max(), input_ids.min()))
+                pdb.set_trace()
         return model_kwargs
 
     def _prepare_decoder_input_ids_for_generation(
