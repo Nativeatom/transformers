@@ -413,8 +413,9 @@ class GenerationMixin:
             }
             try:
                 model_kwargs["encoder_outputs"]: ModelOutput = encoder(input_ids, return_dict=True, **encoder_kwargs)
-            except:
-                print(input_ids.shape)
+            except Exception as e:
+                print("Err: ", e)
+                print("input_ids shape: ", input_ids.shape)
                 # print("input_ids max: {} min: {}".format(torch.max(input_ids), torch.min(input_ids)))
                 pdb.set_trace()
         return model_kwargs
