@@ -1282,9 +1282,15 @@ class GenerationMixin:
                 input_ids, max_length
             )
         elif "encoder_outputs" in model_kwargs:
-            sequence_lengths, unfinished_sequences, cur_len = self._init_sequence_length_for_generation(
-                model_kwargs["encoder_outputs"][0], max_length
-            )
+            # sequence_lengths, unfinished_sequences, cur_len = self._init_sequence_length_for_generation(input_ids=None, 
+            # input_embeds=model_kwargs["encoder_outputs"][0], 
+            # max_length=max_length)
+
+            inp_emb = model_kwargs["encoder_outputs"][0]
+            bz, length, hidden = inp_emb.shape
+            unfinished_sequences = inp_emb.new(length).fill_(1)
+            sequence_lengths = inp_emb.new(length).fill_(max_length)
+            cur_len = 0            
 
         print("cur_len={} max_len={}".format(cur_len, max_length))
         pdb.set_trace()
