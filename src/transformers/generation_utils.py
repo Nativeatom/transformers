@@ -1310,7 +1310,7 @@ class GenerationMixin:
                 # )
                 outputs = self(
                     **model_inputs,
-                    input_embeds=imput_embeds,
+                    inputs_embeds=input_embeds,
                     return_dict=True,
                     output_attentions=output_attentions,
                     output_hidden_states=output_hidden_states,
