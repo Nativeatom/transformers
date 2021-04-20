@@ -492,12 +492,18 @@ class GenerationMixin:
 
     @staticmethod
     def _init_sequence_length_for_generation(
-        input_ids: torch.LongTensor, max_length: int
+        input_ids: torch.LongTensor, max_length: int, input_embeds=None
     ) -> Tuple[torch.Tensor, torch.Tensor, int]:
-        unfinished_sequences = input_ids.new(input_ids.shape[0]).fill_(1)
-        sequence_lengths = input_ids.new(input_ids.shape[0]).fill_(max_length)
-
-        cur_len = input_ids.shape[-1]
+        if not input_embeds:
+            unfinished_sequences = input_ids.new(input_ids.shape[0]).fill_(1)
+            sequence_lengths = input_ids.new(input_ids.shape[0]).fill_(max_length)
+            cur_len = input_ids.shape[-1]
+        else:
+            bz, length, hidden = input_embeds.shape
+            unfinished_sequences = input_embeds.new(length).fill_(1)
+            sequence_lengths = input_embeds.new(length).fill_(max_length)
+            cur_len = 0            
+        
         return sequence_lengths, unfinished_sequences, cur_len
 
     @staticmethod
@@ -1155,6 +1161,7 @@ class GenerationMixin:
     def greedy_search(
         self,
         input_ids: torch.LongTensor,
+        input_embeds = None,
         logits_processor: Optional[LogitsProcessorList] = None,
         stopping_criteria: Optional[StoppingCriteriaList] = None,
         max_length: Optional[int] = None,
@@ -1269,13 +1276,21 @@ class GenerationMixin:
             )
 
         # init sequence length tensors
-        sequence_lengths, unfinished_sequences, cur_len = self._init_sequence_length_for_generation(
-            input_ids, max_length
-        )
+        if input_ids is not None:
+            sequence_lengths, unfinished_sequences, cur_len = self._init_sequence_length_for_generation(
+                input_ids, max_length
+            )
+        elif "encoder_outputs" in model_kwargs:
+            sequence_lengths, unfinished_sequences, cur_len = self._init_sequence_length_for_generation(
+                model_kwargs["encoder_outputs"][0], max_length
+            )
 
         while cur_len < max_length:
             # prepare model inputs
-            model_inputs = self.prepare_inputs_for_generation(input_ids, **model_kwargs)
+            if input_ids:
+                model_inputs = self.prepare_inputs_for_generation(input_ids, **model_kwargs)
+            else:
+                model_inputs = {"input_embeds": input_embeds}
 
             # forward pass to get next token
             outputs = self(
@@ -1316,6 +1331,7 @@ class GenerationMixin:
                 next_tokens = next_tokens * unfinished_sequences + (pad_token_id) * (1 - unfinished_sequences)
 
             # add token and increase length by one
+            pdb.set_trace()
             input_ids = torch.cat([input_ids, next_tokens[:, None]], dim=-1)
 
             # update sequence length
