@@ -1293,21 +1293,31 @@ class GenerationMixin:
             cur_len = 0            
 
         print("cur_len={} max_len={}".format(cur_len, max_length))
-        pdb.set_trace()
         while cur_len < max_length:
             # prepare model inputs
             if input_ids:
                 model_inputs = self.prepare_inputs_for_generation(input_ids, **model_kwargs)
             else:
-                model_inputs = {"input_embeds": input_embeds}
+                model_inputs = {"input_ids": None}
 
             # forward pass to get next token
-            outputs = self(
-                **model_inputs,
-                return_dict=True,
-                output_attentions=output_attentions,
-                output_hidden_states=output_hidden_states,
-            )
+            try:
+                # outputs = self(
+                #     **model_inputs,
+                #     return_dict=True,
+                #     output_attentions=output_attentions,
+                #     output_hidden_states=output_hidden_states,
+                # )
+                outputs = self(
+                    **model_inputs,
+                    input_embeds=imput_embeds,
+                    return_dict=True,
+                    output_attentions=output_attentions,
+                    output_hidden_states=output_hidden_states,
+                )
+            except Exception as e:
+                print("ERR: ", e)
+                pdb.set_trace()
             next_token_logits = outputs.logits[:, -1, :]
 
             # Store scores, attentions and hidden_states when required
