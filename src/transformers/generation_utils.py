@@ -1286,6 +1286,8 @@ class GenerationMixin:
                 model_kwargs["encoder_outputs"][0], max_length
             )
 
+        print("cur_len={} max_len={}".format(cur_len, max_length))
+        pdb.set_trace()
         while cur_len < max_length:
             # prepare model inputs
             if input_ids:
